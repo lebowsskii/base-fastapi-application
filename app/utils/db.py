@@ -13,7 +13,7 @@ from app.utils.serialize import json_serializer
 
 
 class DatabaseSessionManager:
-    def __init__(self, dsn: str, engine_kwargs=None):
+    def __init__(self, dsn: str, engine_kwargs: dict[str, Any] | None = None):
         if engine_kwargs is None:
             engine_kwargs = {}
         self._engine = create_async_engine(dsn, **engine_kwargs)
@@ -32,7 +32,7 @@ class DatabaseSessionManager:
 
     async def close(self):
         if self._engine is None:
-            raise Exception("DatabaseSessionManager is not initialized")
+            raise RuntimeError("DatabaseSessionManager is not initialized")
         await self._engine.dispose()
 
         self._engine = None
@@ -41,19 +41,15 @@ class DatabaseSessionManager:
     @contextlib.asynccontextmanager
     async def connect(self) -> AsyncGenerator[AsyncConnection, None]:
         if self._engine is None:
-            raise Exception("DatabaseSessionManager is not initialized")
+            raise RuntimeError("DatabaseSessionManager is not initialized")
 
         async with self._engine.begin() as connection:
-            try:
-                yield connection
-            except Exception:
-                await connection.rollback()
-                raise
+            yield connection
 
     @contextlib.asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
         if self._sessionmaker is None:
-            raise Exception("DatabaseSessionManager is not initialized")
+            raise RuntimeError("DatabaseSessionManager is not initialized")
 
         session = self._sessionmaker()
         try:
@@ -72,5 +68,6 @@ sessionmanager = DatabaseSessionManager(
         "json_serializer": json_serializer,
         "pool_size": settings.db_pool_size,
         "max_overflow": settings.db_max_overflow,
+        "pool_pre_ping": True,
     },
 )
