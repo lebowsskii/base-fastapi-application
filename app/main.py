@@ -2,7 +2,6 @@ import asyncio
 import sys
 from contextlib import asynccontextmanager
 
-import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -15,8 +14,6 @@ from app.utils.admin_auth import AdminAuth
 from app.utils.db import sessionmanager
 from app.utils.exceptions import register_exception_handlers
 from app.utils.shutdown import handle_shutdown
-
-uvloop.install()
 
 
 @asynccontextmanager

@@ -10,4 +10,5 @@ exec uvicorn app.main:app \
   --port 8000 \
   --forwarded-allow-ips="*" \
   --proxy-headers \
-  --lifespan on
+  --lifespan on \
+  --loop uvloop
